@@ -10,7 +10,7 @@ import org.json.JSONException;
 import android.content.Context;
 import android.content.ClipboardManager;
 import android.content.ClipData;
-import android.content.ClipDescription;
+import android.os.Build;
 
 public class Clipboard extends CordovaPlugin {
 
@@ -20,10 +20,15 @@ public class Clipboard extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        ClipboardManager clipboard = (ClipboardManager) cordova.getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipboardManager clipboard = (ClipboardManager) cordova.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
 
         if (action.equals(actionCopy)) {
             try {
+                if (clipboard == null) {
+                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Clipboard service unavailable"));
+                    return true;
+                }
+
                 String text = args.getString(0);
                 ClipData clip = ClipData.newPlainText("Text", text);
 
@@ -40,11 +45,19 @@ public class Clipboard extends CordovaPlugin {
         } else if (action.equals(actionPaste)) {
             try {
                 String text = "";
-                
-                ClipData clip = clipboard.getPrimaryClip();
-                if (clip != null) {
+
+                if (clipboard != null && clipboard.hasPrimaryClip()) {
+                    ClipData clip = clipboard.getPrimaryClip();
+                    if (clip == null || clip.getItemCount() < 1) {
+                        callbackContext.success(text);
+                        return true;
+                    }
+
                     ClipData.Item item = clip.getItemAt(0);
-                    text = item.getText().toString();
+                    CharSequence coercedText = item.coerceToText(cordova.getContext());
+                    if (coercedText != null) {
+                        text = coercedText.toString();
+                    }
                 }
                 callbackContext.success(text);
 
@@ -54,8 +67,17 @@ public class Clipboard extends CordovaPlugin {
             }
         } else if (action.equals(actionClear)) {
             try {
-                ClipData clip = ClipData.newPlainText("", "");
-                clipboard.setPrimaryClip(clip);
+                if (clipboard == null) {
+                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Clipboard service unavailable"));
+                    return true;
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    clipboard.clearPrimaryClip();
+                } else {
+                    ClipData clip = ClipData.newPlainText("", "");
+                    clipboard.setPrimaryClip(clip);
+                }
 
                 callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK));
 
@@ -68,5 +90,4 @@ public class Clipboard extends CordovaPlugin {
         return false;
     }
 }
-
 

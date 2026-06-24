@@ -6,24 +6,21 @@
 @implementation CDVClipboard
 
 - (void)copy:(CDVInvokedUrlCommand*)command {
-	[self.commandDelegate runInBackground:^{
+	dispatch_async(dispatch_get_main_queue(), ^{
 		UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-		NSString     *text       = [command.arguments objectAtIndex:0];
+		NSString     *text       = [command argumentAtIndex:0 withDefault:@""];
 
-		pasteboard.string = text;
+		pasteboard.string = text ?: @"";
 
-		CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:text];
+		CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:(text ?: @"")];
 		[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 	}];
 }
 
 - (void)paste:(CDVInvokedUrlCommand*)command {
-	[self.commandDelegate runInBackground:^{
+	dispatch_async(dispatch_get_main_queue(), ^{
 		UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-		NSString     *text       = [pasteboard valueForPasteboardType:@"public.text"];
-		if (text == nil) {
-			text = @"";
-		}
+		NSString     *text       = pasteboard.string ?: @"";
 
 		CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:text];
 		[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -31,9 +28,9 @@
 }
 
 - (void)clear:(CDVInvokedUrlCommand*)command {
-	[self.commandDelegate runInBackground:^{
+	dispatch_async(dispatch_get_main_queue(), ^{
 		UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-    		[pasteboard setValue:@"" forPasteboardType:UIPasteboardNameGeneral];
+		pasteboard.string = @"";
 
 		CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:true];
 		[self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

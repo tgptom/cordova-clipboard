@@ -2,10 +2,12 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="cordova-clipboard"
-    version="1.3.0">
+    version="1.4.0">
 
     <engines>
-        <engine name="cordova" version=">=4.0.0" />
+        <engine name="cordova" version=">=12.0.0" />
+        <engine name="cordova-android" version=">=15.0.0" />
+        <engine name="cordova-ios" version=">=8.0.0" />
     </engines>
 
     <name>Clipboard</name>
@@ -34,18 +36,6 @@
         <source-file src="src/ios/CDVClipboard.m" />
     </platform>
     
-    <!-- OS X -->
-    <platform name="osx">
-        <config-file target="config.xml" parent="/*">
-            <feature name="Clipboard">
-                <param name="ios-package" value="CDVClipboard" />
-            </feature>
-        </config-file>
-
-        <header-file src="src/osx/CDVClipboard.h" />
-        <source-file src="src/osx/CDVClipboard.m" />
-    </platform>
-    
     <!-- Android -->
     <platform name="android">
         <source-file src="src/android/Clipboard.java" target-dir="src/com/verso/cordova/clipboard" />
@@ -57,21 +47,4 @@
         </config-file>
     </platform>
 
-    <!-- Windows Phone 8 -->
-    <platform name="wp8">
-        <config-file target="config.xml" parent="/*">
-            <feature name="Clipboard">
-                <param name="wp-package" value="Clipboard"/>
-            </feature>
-        </config-file>
-
-        <source-file src="src/wp8/Clipboard.cs" />
-    </platform>
-
-    <!-- Windows uwp -->
-    <platform name="windows">
-        <js-module src="src/windows/ClipboardProxy.js" name="ClipboardProxy">
-            <merges target="" />
-        </js-module>
-    </platform>
 </plugin>

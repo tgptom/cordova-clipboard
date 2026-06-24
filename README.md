@@ -1,7 +1,7 @@
 Clipboard
 =========
 
-Clipboard management plugin for Cordova/PhoneGap that supports iOS, Android, and Windows Phone 8.
+Clipboard management plugin for Cordova/PhoneGap that supports Android and iOS.
 
 ## Usage
 
@@ -21,19 +21,25 @@ Example:
 
 	cordova.plugins.clipboard.clear();
 
+## Supported platforms
+
+- Android (`cordova-android >=15.0.0`)
+- iOS (`cordova-ios >=8.0.0`)
+
 ## Notes
 
 ### All platforms
 
 - The plugin only works with text content.
 
-### Windows Phone
-
-- The Windows Phone platform doesn't allow applications to read the content of the clipboard. Using the `paste` method will return an error.
-
 ### Android
 
-- The minimum supported API Level is 11. Make sure that `minSdkVersion` is larger or equal to 11 in `AndroidManifest.xml`.
+- Android clipboard access behavior is controlled by the OS. Reading clipboard content can be restricted when apps are in the background.
+- Newer Android versions may also show system UI/notifications when clipboard content is read.
+
+### iOS
+
+- iOS may show privacy indicators/prompts/notifications when clipboard content is read, depending on OS version and app state.
 
 ## Acknowledgements
 

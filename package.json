@@ -1,6 +1,6 @@
 {
   "name": "cordova-clipboard",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Clipboard management plugin for Cordova/PhoneGap that supports Android and iOS",
   "cordova": {
     "id": "cordova-clipboard",

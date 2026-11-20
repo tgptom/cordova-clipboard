@@ -16,16 +16,21 @@ function isOptionsObject (value) {
 function normalizeOptions (options) {
 	options = isOptionsObject(options) ? options : {};
 
-	var expiresInMs = Number(options.expiresInMs);
-	if (!isFinite(expiresInMs) || expiresInMs < DEFAULT_EXPIRES_IN_MS) {
-		expiresInMs = DEFAULT_EXPIRES_IN_MS;
-	}
-
-	return {
-		expiresInMs: expiresInMs,
+	var normalized = {
 		sensitive: options.sensitive === true,
 		localOnly: options.localOnly === true
 	};
+
+	// Expiry is opt-in: only enabled when expiresInMs is passed.
+	if (typeof options.expiresInMs !== "undefined" && options.expiresInMs !== null) {
+		var expiresInMs = Number(options.expiresInMs);
+		if (!isFinite(expiresInMs) || expiresInMs < DEFAULT_EXPIRES_IN_MS) {
+			expiresInMs = DEFAULT_EXPIRES_IN_MS;
+		}
+		normalized.expiresInMs = expiresInMs;
+	}
+
+	return normalized;
 }
 
 /**
@@ -40,8 +45,8 @@ function normalizeOptions (options) {
  * @param {Function} onSuccess The function to call in case of success (takes the copied text as argument)
  * @param {Function} onFail    The function to call in case of error
  * @param {Object}   options   Optional settings:
- *                               expiresInMs {Number}  Time until the copied text is removed from the clipboard.
- *                                                     Defaults to (and is never less than) 120000.
+ *                               expiresInMs {Number}  Opt-in. Time until the copied text is removed from the clipboard.
+ *                                                     Never less than 120000. Omit to keep the text indefinitely.
  *                               sensitive   {Boolean} Android 13+: hide the system clipboard preview.
  *                               localOnly   {Boolean} iOS: do not sync via Universal Clipboard.
  */

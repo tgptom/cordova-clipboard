@@ -19,11 +19,11 @@ The plugin creates the object `cordova.plugins.clipboard` with the methods `copy
 
 | Option        | Default  | Description |
 | ------------- | -------- | ----------- |
-| `expiresInMs` | `120000` | Time after which the copied text is removed from the clipboard. Values below `120000` (or invalid values) fall back to `120000`. |
+| `expiresInMs` | none     | Opt-in. Time after which the copied text is removed from the clipboard. Values below `120000` (or invalid values) fall back to `120000`. When omitted, the text stays on the clipboard as before. |
 | `sensitive`   | `false`  | Android 13+: marks the clip with `ClipDescription.EXTRA_IS_SENSITIVE`, which hides the system clipboard preview. Other apps can still paste it. Ignored on iOS. |
 | `localOnly`   | `false`  | iOS: sets `UIPasteboardOptionLocalOnly`, which prevents Universal Clipboard sync to other devices. Paste on the same device still works. Ignored on Android, which has no local-only clipboard. |
 
-Every `copy` call expires, including calls without options (default `120000` ms).
+Copied text only expires when `expiresInMs` is passed. Calls without it keep the previous behaviour.
 
 Example:
 
@@ -52,13 +52,13 @@ Example:
 
 - Android clipboard access behavior is controlled by the OS. Reading clipboard content can be restricted when apps are in the background.
 - Newer Android versions may also show system UI/notifications when clipboard content is read.
-- Expiry is scheduled by the plugin. When it fires, the clipboard is cleared only if it still holds exactly the clip written by that `copy` call (same text and, on Android 8+, same clip timestamp). Content copied afterwards by the user or another app is never wiped. Calling `copy` again cancels and replaces the pending clear; calling `clear` cancels it.
+- Expiry (when `expiresInMs` is passed) is scheduled by the plugin. When it fires, the clipboard is cleared only if it still holds exactly the clip written by that `copy` call (same text and, on Android 8+, same clip timestamp). Content copied afterwards by the user or another app is never wiped. Calling `copy` again cancels and replaces the pending clear; calling `clear` cancels it.
 - Android 10+ blocks clipboard reads while the app is not focused. If expiry fires while the app is in the background, the check runs as soon as the app regains focus. A pending clear is lost if the app process is killed.
 
 ### iOS
 
 - iOS may show privacy indicators/prompts/notifications when clipboard content is read, depending on OS version and app state.
-- Text is written with `setItems:options:` as `public.utf8-plain-text`, and `UIPasteboardOptionExpirationDate` is set from `expiresInMs`. The system removes the item at expiry, even while the app is in the background.
+- Text is written with `setItems:options:` as `public.utf8-plain-text`, and `UIPasteboardOptionExpirationDate` is set from `expiresInMs` when it is passed. The system removes the item at expiry, even while the app is in the background.
 
 ## Acknowledgements
 

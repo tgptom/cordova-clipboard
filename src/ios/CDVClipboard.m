@@ -20,12 +20,16 @@ static const double CDVClipboardDefaultExpiresInMs = 120000.0;
 		text = [rawText stringValue];
 	}
 
-	double expiresInMs = CDVClipboardDefaultExpiresInMs;
+	// Expiry is opt-in: only enabled when expiresInMs is passed.
+	double expiresInMs = 0;
 	id expiresValue = options[@"expiresInMs"];
-	if ([expiresValue isKindOfClass:[NSNumber class]]) {
-		double requested = [expiresValue doubleValue];
-		if (isfinite(requested) && requested > CDVClipboardDefaultExpiresInMs) {
-			expiresInMs = requested;
+	if (expiresValue != nil && expiresValue != [NSNull null]) {
+		expiresInMs = CDVClipboardDefaultExpiresInMs;
+		if ([expiresValue isKindOfClass:[NSNumber class]]) {
+			double requested = [expiresValue doubleValue];
+			if (isfinite(requested) && requested > CDVClipboardDefaultExpiresInMs) {
+				expiresInMs = requested;
+			}
 		}
 	}
 
@@ -34,7 +38,9 @@ static const double CDVClipboardDefaultExpiresInMs = 120000.0;
 
 	dispatch_async(dispatch_get_main_queue(), ^{
 		NSMutableDictionary<UIPasteboardOption, id> *pasteboardOptions = [NSMutableDictionary dictionary];
-		pasteboardOptions[UIPasteboardOptionExpirationDate] = [NSDate dateWithTimeIntervalSinceNow:(expiresInMs / 1000.0)];
+		if (expiresInMs > 0) {
+			pasteboardOptions[UIPasteboardOptionExpirationDate] = [NSDate dateWithTimeIntervalSinceNow:(expiresInMs / 1000.0)];
+		}
 		if (localOnly) {
 			// Blocks Universal Clipboard (Handoff) sync only; same-device paste still works.
 			pasteboardOptions[UIPasteboardOptionLocalOnly] = @YES;

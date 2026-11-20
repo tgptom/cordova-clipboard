@@ -112,10 +112,12 @@ public class Clipboard extends CordovaPlugin {
 
             // Replace any earlier pending clear only once the new clip is in place.
             cancelPendingExpiry();
-            expiringText = text;
-            expiringTimestamp = readPrimaryClipTimestamp(clipboard);
-            pendingExpiry = this::onExpiry;
-            mainHandler.postDelayed(pendingExpiry, expiresInMs);
+            if (expiresInMs > 0) {
+                expiringText = text;
+                expiringTimestamp = readPrimaryClipTimestamp(clipboard);
+                pendingExpiry = this::onExpiry;
+                mainHandler.postDelayed(pendingExpiry, expiresInMs);
+            }
 
             callbackContext.success(text);
         } catch (Exception e) {
@@ -279,9 +281,10 @@ public class Clipboard extends CordovaPlugin {
         }
     }
 
+    // Returns 0 (no expiry) unless the caller opted in by passing expiresInMs.
     private static long readExpiresInMs(JSONObject options) {
-        if (options == null) {
-            return DEFAULT_EXPIRES_IN_MS;
+        if (options == null || options.isNull("expiresInMs")) {
+            return 0;
         }
         double value = options.optDouble("expiresInMs", DEFAULT_EXPIRES_IN_MS);
         if (Double.isNaN(value) || value < DEFAULT_EXPIRES_IN_MS) {
